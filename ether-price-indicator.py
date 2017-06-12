@@ -21,34 +21,32 @@ HOME = expanduser("~")
 APP_DIR = HOME + "/.local/share/applications/"
 SETTINGS_FILE = os.path.abspath(APP_DIR + "ether_indicator_settings.dat")
 ICON_FILE = os.path.abspath(APP_DIR + "ether_icon.png")
-APP_NAME = 'Ether Indicator';
+APP_NAME = 'Ether Indicator'
 APP_VERSION = '1.0'
 
 BAD_RETRIEVE = 0xDEADBEEF
 
+
 class EtherPriceIndicator:
     # A dictionary representing the block details to be output.
-    block_dict = { "Block": 0,
-                   "Timestamp": 0,
-                   "Difficulty": 0,
-                   "Gas": 0,
-                   "Blocktime": 0 }
+    block_dict = {"Block": 0,
+                  "Timestamp": 0,
+                  "Difficulty": 0,
+                  "Gas": 0,
+                  "Blocktime": 0}
 
     # A dictionary representing the available price converstions.
-    price_dict = { "usdeth": "None",
-                   "btceth": "None",
-                   "ethusd": "None",
-                   "ethbtc": "None" }
+    price_dict = {"ethcad": "None"}
 
     # Global variables for setting values in sub-menus.
     refresh_frequency = 3
-    exchange = 'usdeth'
+    exchange = 'ethcad'
 
     def __init__(self):
         """Initialise."""
         self.init_from_file()
         self.ind = appindicator.Indicator(
-            "ether-indicator", 
+            "ether-indicator",
             self.ICON_FILE,
             appindicator.CATEGORY_APPLICATION_STATUS)
         self.ind.set_status(appindicator.STATUS_ACTIVE)
@@ -64,24 +62,25 @@ class EtherPriceIndicator:
     def init_from_file(self):
         """Initialise from the settings file, if it exists."""
         try:
-            with open(SETTINGS_FILE): pass
+            with open(SETTINGS_FILE):
+                pass
         except IOError:
             self.create_log("Need to make new file.")
             file = open(SETTINGS_FILE, 'w')
             file.write(os.getcwd() + '\n')
             file.write('30\n')
-            file.write('usdeth')
+            file.write('ethcad')
             file.close()
         f = open(SETTINGS_FILE, 'r')
         lines = f.readlines()
         currDir = (lines[0].strip())
         if ".local/share/applications" not in currDir:
-            self.set_app_dir    (currDir)
+            self.set_app_dir(currDir)
         print "App Directory : " + self.APP_DIR
         print "Refresh rate:", int(lines[1]), " seconds"
         self.refresh_frequency = int(lines[1])
         self.exchange = lines[2].strip()
-    
+
         f.close()
 
     def set_app_dir(self, currDir):
@@ -119,7 +118,7 @@ class EtherPriceIndicator:
         separator.show()
         self.menu.append(separator)
 
-        self.update = gtk.MenuItem("Update block data...") 
+        self.update = gtk.MenuItem("Update block data...")
         self.update.connect("activate", self.menu_update_response)
         self.update.show()
         self.menu.append(self.update)
@@ -128,7 +127,7 @@ class EtherPriceIndicator:
         separator.show()
         self.menu.append(separator)
 
-        # Create exchange sub-menu.        
+        # Create exchange sub-menu.
         self.menu_exchange_create(self.menu)
 
         # Create refresh rate sub-menu.
@@ -139,7 +138,7 @@ class EtherPriceIndicator:
         self.menu.append(separator)
 
         # Add general munu options at the bottom.
-        self.about = gtk.MenuItem("About") 
+        self.about = gtk.MenuItem("About")
         self.about.connect("activate", self.menu_about_response)
         self.about.show()
         self.menu.append(self.about)
@@ -160,42 +159,42 @@ class EtherPriceIndicator:
         exchangeMenu = gtk.Menu()
         exMenu = gtk.MenuItem("Set exchange:")
         exMenu.set_submenu(exchangeMenu)
-        
+
         self.ETHtickers = None
-        menuUSDETH = gtk.RadioMenuItem(self.ETHtickers,"USD / ETH"); 
-        menuUSDETH.connect("activate", 
-                           lambda x: self.menu_exchange_response("usdeth")); 
-        menuUSDETH.show()        
-        if (self.exchange == "usdeth"):
-            menuUSDETH.set_active(True)
-        self.ETHtickers = menuUSDETH;
-        menuBTCETH = gtk.RadioMenuItem(self.ETHtickers,"BTC / ETH"); 
-        menuBTCETH.connect("activate", 
-                           lambda x: self.menu_exchange_response("btceth")); 
+        menuCADETH = gtk.RadioMenuItem(self.ETHtickers, "CAD / ETH")
+        menuCADETH.connect("activate",
+                           lambda x: self.menu_exchange_response("ethcad"))
+        menuCADETH.show()
+        if (self.exchange == "ethcad"):
+            menuCADETH.set_active(True)
+        self.ETHtickers = menuCADETH
+        menuBTCETH = gtk.RadioMenuItem(self.ETHtickers, "BTC / ETH")
+        menuBTCETH.connect("activate",
+                           lambda x: self.menu_exchange_response("btceth"))
         menuBTCETH.show()
         if (self.exchange == "btceth"):
             menuBTCETH.set_active(True)
-        self.ETHtickers = menuBTCETH;
-        menuETHUSD = gtk.RadioMenuItem(self.ETHtickers,"ETH / USD"); 
-        menuETHUSD.connect("activate", 
-                           lambda x: self.menu_exchange_response("ethusd")); 
+        self.ETHtickers = menuBTCETH
+        menuETHUSD = gtk.RadioMenuItem(self.ETHtickers, "ETH / USD")
+        menuETHUSD.connect("activate",
+                           lambda x: self.menu_exchange_response("ethusd"))
         menuETHUSD.show()
         if (self.exchange == "ethusd"):
             menuETHUSD.set_active(True)
-        self.ETHtickers = menuETHUSD;
-        menuETHBTC = gtk.RadioMenuItem(self.ETHtickers,"ETH / BTC"); 
-        menuETHBTC.connect("activate", 
-                           lambda x: self.menu_exchange_response("ethbtc")); 
+        self.ETHtickers = menuETHUSD
+        menuETHBTC = gtk.RadioMenuItem(self.ETHtickers, "ETH / BTC")
+        menuETHBTC.connect("activate",
+                           lambda x: self.menu_exchange_response("ethbtc"))
         menuETHBTC.show()
         if (self.exchange == "ethbtc"):
             menuETHBTC.set_active(True)
-        self.ETHtickers = menuETHBTC;
+        self.ETHtickers = menuETHBTC
 
-        exchangeMenu.append(menuUSDETH);
-        exchangeMenu.append(menuBTCETH);        
-        exchangeMenu.append(menuETHUSD);
-        exchangeMenu.append(menuETHBTC);
-        exMenu.show() 
+        exchangeMenu.append(menuCADETH)
+        # exchangeMenu.append(menuBTCETH)
+        # exchangeMenu.append(menuETHUSD)
+        # exchangeMenu.append(menuETHBTC)
+        exMenu.show()
         exchangeMenu.show()
         menuIn.append(exMenu)
 
@@ -209,30 +208,30 @@ class EtherPriceIndicator:
         refMenu.set_submenu(refreshmenu)
 
         self.refreshRates = None
-        menuRefresh1 = gtk.RadioMenuItem(self.refreshRates,"30s"); 
+        menuRefresh1 = gtk.RadioMenuItem(self.refreshRates, "30s")
         menuRefresh1.connect("activate",
-                             lambda x: self.menu_refresh_response(30)); 
+                             lambda x: self.menu_refresh_response(30))
         menuRefresh1.show()
         if (self.refresh_frequency == 30):
             menuRefresh1.set_active(True)
         self.refreshRates = menuRefresh1
-        menuRefresh2 = gtk.RadioMenuItem(self.refreshRates,"1m"); 
+        menuRefresh2 = gtk.RadioMenuItem(self.refreshRates, "1m")
         menuRefresh2.connect("activate",
-                             lambda x: self.menu_refresh_response(60)); 
+                             lambda x: self.menu_refresh_response(60))
         menuRefresh2.show()
         if (self.refresh_frequency == 60):
             menuRefresh2.set_active(True)
         self.refreshRates = menuRefresh2
-        menuRefresh3 = gtk.RadioMenuItem(self.refreshRates,"5m"); 
+        menuRefresh3 = gtk.RadioMenuItem(self.refreshRates, "5m")
         menuRefresh3.connect("activate",
-                             lambda x: self.menu_refresh_response(300)); 
+                             lambda x: self.menu_refresh_response(300))
         menuRefresh3.show()
         if (self.refresh_frequency == 300):
             menuRefresh3.set_active(True)
         self.refreshRates = menuRefresh3
-        menuRefresh4 = gtk.RadioMenuItem(self.refreshRates,"10m"); 
+        menuRefresh4 = gtk.RadioMenuItem(self.refreshRates, "10m")
         menuRefresh4.connect("activate",
-                             lambda x: self.menu_refresh_response(600)); 
+                             lambda x: self.menu_refresh_response(600))
         menuRefresh4.show()
         if (self.refresh_frequency == 600):
             menuRefresh4.set_active(True)
@@ -242,12 +241,12 @@ class EtherPriceIndicator:
         refreshmenu.append(menuRefresh2)
         refreshmenu.append(menuRefresh3)
         refreshmenu.append(menuRefresh4)
-        refMenu.show() 
+        refMenu.show()
         refreshmenu.show()
-        menuIn.append(refMenu)    
+        menuIn.append(refMenu)
 
     def menu_update_response(self, widget):
-        """Handle the update menu selection."""        
+        """Handle the update menu selection."""
         self.create_log("Updating block data")
         self.init_callback()
 
@@ -261,7 +260,7 @@ class EtherPriceIndicator:
         self.create_log("Setting exchange to " + exch)
         self.exchange = exch
         output = self.set_price_data_user()
-        self.ind.set_label(output)             
+        self.ind.set_label(output)
 
     def menu_quit_response(self, widget):
         """Handle the quit menu selection."""
@@ -281,40 +280,52 @@ class EtherPriceIndicator:
         """Handle the about menu selection."""
         self.menu.set_sensitive(False)
         widget.set_sensitive(False)
-        
+
         ad = gtk.AboutDialog()
         ad.set_name(APP_NAME)
         ad.set_version(APP_VERSION)
         ad.set_comments("An Ethereum ticker indicator")
-        ad.set_license(''+
-        'This program is free software: you can redistribute it and/or\n' +
-        'modify it under the terms of the GNU General Public License as\n' +
-        'published by the Free Software Foundation, either version 3 of\n' +
-        'the License, or (at your option) any later version.\n\n' +
-        'This program is distributed in the hope that it will be useful,\n' +
-        'but WITHOUT ANY WARRANTY; without even the implied warranty of\n' + 
-        'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n' +
-        'General Public License for more details.\n\n' +
-        'You should have received a copy of the GNU General Public License\n' +
-        'along with this program. If not, see <http://www.gnu.org/licenses/>.')
+        ad.set_license('' +
+                       'This program is free software: you can redistribute it and/or\n' +
+                       'modify it under the terms of the GNU General Public License as\n' +
+                       'published by the Free Software Foundation, either version 3 of\n' +
+                       'the License, or (at your option) any later version.\n\n' +
+                       'This program is distributed in the hope that it will be useful,\n' +
+                       'but WITHOUT ANY WARRANTY; without even the implied warranty of\n' +
+                       'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU\n' +
+                       'General Public License for more details.\n\n' +
+                       'You should have received a copy of the GNU General Public License\n' +
+                       'along with this program. If not, see <http://www.gnu.org/licenses/>.')
         ad.set_website('https://github.com/RichHorrocks/ether-price-indicator')
         ad.set_authors(['Written by RichHorrocks.\n' +
                         'Based on code by jj9.\n' +
                         'Tips appreciated! \n\n' +
                         'BTC: 1HCAo4UeQjQrtxCBUzatYxzt8u1UyafPi5\n' +
-                        'ETH: I should really get a wallet...\n' ])
+                        'ETH: I should really get a wallet...\n'])
         ad.run()
         ad.destroy()
         self.menu.set_sensitive(True)
         widget.set_sensitive(True)
-        
+
     def get_api_data(self):
         """Get the data by calling the external API."""
         data = BAD_RETRIEVE
-        try :
-            r = requests.get("https://etherchain.org/api/basic_stats", 
+        try:
+            r = requests.get("https://etherchain.org/api/basic_stats",
                              verify=True)
-            data = r.json()            
+            data = r.json()
+        except requests.exceptions.RequestException as e:
+            print e
+
+        return data
+
+    def get_quadirga_data(self):
+        """Get the data by calling the external API."""
+        data = BAD_RETRIEVE
+        try:
+            r = requests.get("https://api.quadrigacx.com/v2/ticker?book=eth_cad",
+                             verify=True)
+            data = r.json()
         except requests.exceptions.RequestException as e:
             print e
 
@@ -323,26 +334,24 @@ class EtherPriceIndicator:
     def set_price_data_user(self):
         """Output the price data to the user."""
         output = {
-           'usdeth': self.price_dict['usdeth'],
-           'btceth': self.price_dict['btceth'],
-           'ethusd': self.price_dict['ethusd'],
-           'ethbtc': self.price_dict['ethbtc']
-        }.get(self.exchange, "Bad conversion") 
+            #    'usdeth': self.price_dict['usdeth'],
+            #    'btceth': self.price_dict['btceth'],
+            #    'ethusd': self.price_dict['ethusd'],
+            #    'ethbtc': self.price_dict['ethbtc']
+            'ethcad': self.price_dict['ethcad']
+        }.get(self.exchange, "Bad conversion")
 
-        return output       
+        return output
 
     def set_price_data(self, data):
         """Cache the price data in a dictionary."""
 
+        bid_price = data['bid']
+        print bid_price
+
         # Calculate and cache the current price conversions.
         # Note that we're rounding to 4 d.p.
-        self.price_dict['usdeth'] = '$ ' + "{0:.4f}".format(data['usd'])
-        self.price_dict['btceth'] = u'\u0243' + "{0:.4f}".format(data['btc'])
-        self.price_dict['ethusd'] = u'\u039E' + \
-                                    "{0:.4f}".format(1 / data['usd']) + ' / $'
-        self.price_dict['ethbtc'] = u'\u039E' + \
-                                    "{0:.4f}".format(1 / data['btc']) + \
-                                    ' / ' + u'\u0243'
+        self.price_dict['ethcad'] = '$ ' + "{0:.4f}".format(float(bid_price))
 
     def set_block_data(self, data):
         """Add the information about the latest block to the drop-down menu.
@@ -359,15 +368,16 @@ class EtherPriceIndicator:
         """Create user output."""
         # Get the data.
         data = self.get_api_data()
-        
+        price_data = self.get_quadirga_data()
+
         # Output the currency data to the indicator bar.
         if data == BAD_RETRIEVE or data["status"] != 1:
             output = "Temp Down"
         else:
-            self.set_price_data(data['data']['price'])
+            self.set_price_data(price_data)
             output = self.set_price_data_user()
             self.set_block_data(data['data']['blockCount'])
-        self.ind.set_label(output)             
+        self.ind.set_label(output)
 
     def create_log(self, str):
         print "{:%Y-%m-%d %H:%M:%S} - ".format(datetime.datetime.now()) + str

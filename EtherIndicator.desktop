@@ -6,3 +6,10 @@ Encoding=UTF-8
 Version=1.0
 
 Name[en_US]=EtherIndicator
+Exec=/data/ether-price-indicator/ether-price-indicator.py
+Icon=/data/ether-price-indicator/res/ethericon.png
+Categories=Internet;
+Type=Application
+Terminal=false
+X-Ayatana-Desktop-Shortcuts=Regular;
+Name[en_US]=Ether Indicator
